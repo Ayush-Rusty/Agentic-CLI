@@ -93,6 +93,10 @@ function displayMessages(messages) {
   });
 }
 
+async function saveMessage(conversationId,role,content){
+    return await chatService.addMessage(conversationId,role,content)
+}
+
 export async function StartChat(mode="chat",conversationId=null){
     try {
         intro(
