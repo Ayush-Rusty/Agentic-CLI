@@ -35,6 +35,34 @@ async function getUserFromToken(){
     return user
 }
 
+async function initConversation(userId,conversationId=null,mode=chat){
+    const spinner=yoctoSpinner({text:"loading conversation..."}).start();
+    const conversation=await chatService.getOrCreateConversation(
+        userId,
+        conversationId,
+        mode
+    )
+    spinner.success("Conversation loaded")
+     const conversationInfo = boxen(
+    `${chalk.bold("Conversation")}: ${conversation.title}\n${chalk.gray("ID: " + conversation.id)}\n${chalk.gray("Mode: " + conversation.mode)}`,
+    {
+      padding: 1,
+      margin: { top: 1, bottom: 1 },
+      borderStyle: "round",
+      borderColor: "cyan",
+      title: "💬 Chat Session",
+      titleAlignment: "center",
+    }
+  );
+    console.log(conversationInfo)
+
+    if(conversation.messages?.length>0){
+        console.log(chalk.yellow("previous messages"));
+        deisplayMessages(conversation.messages);
+    }
+
+    return conversation
+}
 
 export async function StartChat(mode="chat",conversationId=null){
     try {
