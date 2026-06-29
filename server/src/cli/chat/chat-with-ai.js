@@ -64,6 +64,35 @@ async function initConversation(userId,conversationId=null,mode=chat){
     return conversation
 }
 
+
+function displayMessages(messages) {
+  messages.forEach((msg) => {
+    if (msg.role === "user") {
+      const userBox = boxen(chalk.white(msg.content), {
+        padding: 1,
+        margin: { left: 2, bottom: 1 },
+        borderStyle: "round",
+        borderColor: "blue",
+        title: "👤 You",
+        titleAlignment: "left",
+      });
+      console.log(userBox);
+    } else {
+      // Render markdown for assistant messages
+      const renderedContent = marked.parse(msg.content);
+      const assistantBox = boxen(renderedContent.trim(), {
+        padding: 1,
+        margin: { left: 2, bottom: 1 },
+        borderStyle: "round",
+        borderColor: "green",
+        title: "🤖 Assistant",
+        titleAlignment: "left",
+      });
+      console.log(assistantBox);
+    }
+  });
+}
+
 export async function StartChat(mode="chat",conversationId=null){
     try {
         intro(
