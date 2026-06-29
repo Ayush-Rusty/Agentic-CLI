@@ -97,12 +97,53 @@ async function saveMessage(conversationId,role,content){
     return await chatService.addMessage(conversationId,role,content)
 }
 
+async function getAIResponse(conversationId) {
+  const spinner = yoctoSpinner({ 
+    text: "AI is thinking...", 
+    color: "cyan" 
+  }).start();
+
+  const dbMessages = await chatService.getMessages(conversationId);
+  const aiMessages = chatService.formatMessagesForAI(dbMessages);
+  
+  let fullResponse = "";
+  let isFirstChunk = true;
+  
+  try {
+    const result = await aiService.sendMessage(aiMessages, (chunk) => {
+      // Stop spinner on first chunk and show header
+      if (isFirstChunk) {
+        spinner.stop();
+        console.log("\n");
+        const header = chalk.green.bold("🤖 Assistant:");
+        console.log(header);
+        console.log(chalk.gray("─".repeat(60)));
+        isFirstChunk = false;
+      }
+      fullResponse += chunk;
+    });
+    
+    // Now render the complete markdown response
+    console.log("\n");
+    const renderedMarkdown = marked.parse(fullResponse);
+    console.log(renderedMarkdown);
+    console.log(chalk.gray("─".repeat(60)));
+    console.log("\n");
+    
+    return result.content;
+  } catch (error) {
+    spinner.error("Failed to get AI response");
+    throw error;
+  }
+}
+
 async function updateConversationTitle(conversationId, userInput, messageCount) {
   if (messageCount === 1) {
     const title = userInput.slice(0, 50) + (userInput.length > 50 ? "..." : "");
     await chatService.updateTitle(conversationId, title);
   }
 }
+
 async function chatLoop(conversation) {
   const helpBox = boxen(
     `${chalk.gray('• Type your message and press Enter')}\n${chalk.gray('• Markdown formatting is supported in responses')}\n${chalk.gray('• Type "exit" to end conversation')}\n${chalk.gray('• Press Ctrl+C to quit anytime')}`,
