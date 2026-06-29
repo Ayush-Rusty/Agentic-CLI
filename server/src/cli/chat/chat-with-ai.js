@@ -103,7 +103,6 @@ async function updateConversationTitle(conversationId, userInput, messageCount) 
     await chatService.updateTitle(conversationId, title);
   }
 }
-
 async function chatLoop(conversation) {
   const helpBox = boxen(
     `${chalk.gray('• Type your message and press Enter')}\n${chalk.gray('• Markdown formatting is supported in responses')}\n${chalk.gray('• Type "exit" to end conversation')}\n${chalk.gray('• Press Ctrl+C to quit anytime')}`,
@@ -153,7 +152,25 @@ async function chatLoop(conversation) {
       break;
     }
 
+  
+  
 
+    // Save user message
+    await saveMessage(conversation.id, "user", userInput);
+
+    // Get messages count before AI response
+    const messages = await chatService.getMessages(conversation.id);
+    
+    // Get AI response with streaming and markdown rendering
+    const aiResponse = await getAIResponse(conversation.id);
+
+    // Save AI response
+    await saveMessage(conversation.id, "assistant", aiResponse);
+
+    // Update title if first exchange
+    await updateConversationTitle(conversation.id, userInput, messages.length);
+  }
+}
 
 export async function StartChat(mode="chat",conversationId=null){
     try {
@@ -181,5 +198,4 @@ export async function StartChat(mode="chat",conversationId=null){
         process.exit(1);
     }
 }
-  }
-}
+  
