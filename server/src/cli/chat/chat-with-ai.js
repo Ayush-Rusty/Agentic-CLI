@@ -104,6 +104,57 @@ async function updateConversationTitle(conversationId, userInput, messageCount) 
   }
 }
 
+async function chatLoop(conversation) {
+  const helpBox = boxen(
+    `${chalk.gray('• Type your message and press Enter')}\n${chalk.gray('• Markdown formatting is supported in responses')}\n${chalk.gray('• Type "exit" to end conversation')}\n${chalk.gray('• Press Ctrl+C to quit anytime')}`,
+    {
+      padding: 1,
+      margin: { bottom: 1 },
+      borderStyle: "round",
+      borderColor: "gray",
+      dimBorder: true,
+    }
+  );
+  
+  console.log(helpBox);
+
+  while (true) {
+    const userInput = await text({
+      message: chalk.blue("💬 Your message"),
+      placeholder: "Type your message...",
+      validate(value) {
+        if (!value || value.trim().length === 0) {
+          return "Message cannot be empty";
+        }
+      },
+    });
+
+    // Handle cancellation (Ctrl+C)
+    if (isCancel(userInput)) {
+      const exitBox = boxen(chalk.yellow("Chat session ended. Goodbye! 👋"), {
+        padding: 1,
+        margin: 1,
+        borderStyle: "round",
+        borderColor: "yellow",
+      });
+      console.log(exitBox);
+      process.exit(0);
+    }
+
+    // Handle exit command
+    if (userInput.toLowerCase() === "exit") {
+      const exitBox = boxen(chalk.yellow("Chat session ended. Goodbye! 👋"), {
+        padding: 1,
+        margin: 1,
+        borderStyle: "round",
+        borderColor: "yellow",
+      });
+      console.log(exitBox);
+      break;
+    }
+
+
+
 export async function StartChat(mode="chat",conversationId=null){
     try {
         intro(
@@ -129,4 +180,6 @@ export async function StartChat(mode="chat",conversationId=null){
         console.log(errorBox);
         process.exit(1);
     }
+}
+  }
 }
